@@ -95,6 +95,8 @@ RUN apt-get install -y --no-install-recommends \
 # dg2.sh (sourced to enable DGPU support if DG2 card is detected on Host PC)
 # ================================================================================
 
+ENV no_proxy "127.0.0.1,localhost,af01p-png.devtools.intel.com,ubit-artifactory-or.intel.com,10.34.40.193,10.34.42.14,10.221.253.199"
+
 # Install DPC++ dependencies
 RUN curl -fsSL https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | apt-key add - \
     && apt-add-repository "deb https://apt.repos.intel.com/oneapi all main"
