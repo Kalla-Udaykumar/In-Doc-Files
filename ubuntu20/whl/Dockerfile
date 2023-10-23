@@ -1,6 +1,6 @@
 # Ubuntu 20.04 baseline image from trusted registry
-# FROM amr-registry.caas.intel.com/esc-devops/baseline/linux/ubuntu/20.04:20201023_1253
-FROM amr-registry.caas.intel.com/esc-devops/baseline/linux/ubuntu/20.04/abi:20230329-1101 
+ FROM amr-registry.caas.intel.com/esc-devops/baseline/linux/ubuntu/20.04:20201023_1253
+# FROM amr-registry.caas.intel.com/esc-devops/baseline/linux/ubuntu/20.04/abi:20230329-1101 
 
 # Packages install from OS repositories
 RUN apt-get update && \
@@ -19,6 +19,7 @@ RUN apt-get update && \
 		python3 \
 		python3-pip \
 		make \
+  		cmake \
 		python3-pexpect \
 		xz-utils \
 		debianutils \
