@@ -1,7 +1,8 @@
 # This Dockerfile is used to cov for IPC-STACK Repo
 # FROM BASE IMAGE OF UBUNTU_20.04
 # FROM amr-registry.caas.intel.com/esc-devops/baseline/linux/ubuntu/20.04/abi:20230329-1101
-#FROM amr-registry.caas.intel.com/esc-devops/linux/abi/ubuntu20:20231025_1100
+# FROM amr-registry.caas.intel.com/esc-devops/linux/abi/ubuntu20:20231025_1100
+# FROM  amr-registry.caas.intel.com/esc-devops/baseline/linux/ubuntu/20.04/abi:20230310-1058
 
 FROM amr-registry.caas.intel.com/esc-devops/baseline/linux/ubuntu/20.04:20201023_1253
 
