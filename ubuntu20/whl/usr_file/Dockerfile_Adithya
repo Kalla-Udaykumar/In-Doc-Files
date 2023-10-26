@@ -1,0 +1,147 @@
+################################################################################
+# Setup:
+# Set proxy in /etc/systemd/system/docker.service.d/http-proxy.conf and
+# /etc/systemd/system/docker.service.d/https-proxy.conf by adding the
+# following 2 lines.
+#[Service]
+#Environment="HTTP_PROXY=http://<proxy ip>:<port>/"
+# Execute the following cmds after the proxy is set.
+# $ sudo systemctl daemon-reload
+# $ sudo systemctl restart docker
+# To check if setup is correct run, $ docker pull hello-world
+# docker run -v $HOME:/host_home -v /home/adithya/secure_compute/recipe_wip/erpc_gtest_unit2:/test_erpc -it --entrypoint /bin/bash  secure_compute
+ 
+################################################################################
+ 
+FROM ubuntu:20.04
+
+RUN apt-get update && apt-get install -y git && apt-get install -y  build-essential
+ 
+RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
+ 
+RUN apt-get install libssl-dev python-setuptools clang-format dos2unix ruby libglib2.0-dev libpcap-dev autoconf libtool libssl-dev gawk pmount libc6-dev-i386  -y
+ 
+RUN apt-get install -y autoconf-archive libcmocka0 libcmocka-dev procps iproute2 build-essential  git   pkg-config   gcc   libtool   automake   libssl-dev   uthash-dev   autoconf   doxygen   libjson-c-dev   libini-config-dev  libcurl4-openssl-dev  libgcrypt-dev cmake
+ 
+RUN apt-get install -y apt-utils autoconf-archive
+RUN apt-get install -y libgcrypt-dev
+RUN apt-get install -y libsqlite3-dev
+RUN apt-get install -y libyaml-dev
+RUN apt-get install -y libnss3-tools
+RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y expect
+RUN apt-get install -y wget tar
+ 
+#RUN wget https://sourceforge.net/projects/ibmswtpm2/files/ibmtpm1563.tar.gz/download -o ibmtpm1563.tar.gz
+ 
+#RUN tar -xvf ibmtpm1563.tar.gz -C ./tpm-sim
+ 
+RUN git clone https://github.com/tpm2-software/tpm2-pkcs11
+RUN git clone https://github.com/tpm2-software/tpm2-tss
+RUN git clone https://github.com/tpm2-software/tpm2-abrmd
+RUN git clone https://github.com/tpm2-software/tpm2-tools
+ 
+WORKDIR tpm2-tss
+RUN ./bootstrap
+RUN ./configure --prefix=/usr
+RUN make -j4
+RUN make install
+ 
+RUN apt-get install -y uuid uuid-dev libuuid1
+ 
+WORKDIR /tpm2-tools
+RUN ./bootstrap
+RUN ./configure
+RUN make -j4
+RUN make install
+ 
+WORKDIR /tpm2-abrmd
+RUN ./bootstrap
+#for native build
+#RUN ./configure --with-dbuspolicydir=/etc/dbus-1/system.d --with-udevrulesdir=/usr/lib/udev/rules.d --with-systemdsystemunitdir=/usr/lib/systemd/system --libdir=/usr/lib64 --prefix=/usr
+ 
+#for docker build
+RUN ./configure --with-dbuspolicydir=/etc/dbus-1/system.d --with-systemdpresetdisable --libdir=/usr/lib
+
+RUN make -j4
+RUN make install
+ 
+WORKDIR /
+RUN wget https://sourceforge.net/projects/ibmswtpm2/files/ibmtpm1563.tar.gz/download -O ibmtpm1563.tar.gz
+RUN mkdir tpm-sim
+RUN tar -xvf ibmtpm1563.tar.gz -C /tpm-sim
+RUN ls -la
+WORKDIR /tpm-sim/src
+RUN make -j4
+ 
+ENV PATH="/tpm-pkcs11/tools:/tpm2-tools/tools:/tpm-sim/src:${PATH}"
+WORKDIR /tpm2-pkcs11
+RUN apt-get -y install python3
+RUN apt-get -y install python3-pip
+RUN pip3 install pyyaml cryptography
+RUN apt-get install -y python3-pyasn1-modules opensc-pkcs11 libp11-dev opensc libp11-3 gnutls-bin junit libhamcrest-java python3-hamcrest
+RUN pip3 install tpm2-pytss
+RUN ./bootstrap
+RUN ./configure --enable-unit
+RUN make -j4
+RUN make install
+ 
+EXPOSE 2321
+EXPOSE 2322
+RUN apt install gdb p11-kit libp11-kit-dev -y
+RUN mkdir -p /var/run/dbus
+#RUN dbus-daemon --fork --system
+ 
+ 
+#################### NEW STUFF
+ 
+RUN apt install -y python3-dev \
+    net-tools \
+    g++ \
+    m4 \
+    libgcrypt20-dev \
+    gnulib \
+    libdbus-1-dev \
+    libglib2.0-dev \
+    clang-6.0 \
+    clang-tools-6.0 \
+    pandoc \
+    lcov \
+    dbus-x11 \
+    python-yaml \
+    python3-yaml \
+    vim-common \
+    python-cryptography \
+    python3-cryptography \
+    libtasn1-6-dev \
+    socat \
+    libseccomp-dev \
+    libengine-pkcs11-openssl \
+    default-jre \
+    default-jdk \
+    sqlite3 \
+    cryptsetup-bin
+ 
+RUN python3 -m pip install cpp-coveralls pyasn1 pyasn1_modules cffi
+ 
+ 
+WORKDIR /
+RUN mkdir java
+RUN mkdir pkcs11_store
+WORKDIR /java
+RUN wget --quiet --show-progress --progress=dot:giga -O junit.jar "https://search.maven.org/remotecontent?filepath=junit/junit/4.13/junit-4.13.jar"
+RUN wget --quiet --show-progress --progress=dot:giga -O hamcrest.jar https://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar
+ 
+ENV CLASSPATH=/java/hamcrest.jar:/java/junit.jar
+ 
+###################new stuff for grpc
+#RUN wget https://github.com/Kitware/CMake/releases/download/v3.21.5/cmake-3.21.5.tar.gz
+#RUN tar -xvf cmake-3.21.5.tar.gz
+#RUN cd cmake-3.21.5 && ./configure
+#RUN make -j2 && make install
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.21.5/cmake-3.21.5-linux-x86_64.sh
+RUN bash ./cmake-3.21.5-linux-x86_64.sh --prefix=/usr/local/ --exclude-subdir
+ 
+WORKDIR /
+ 
+#RUN service dbus start
+ENV TPM2_PKCS11_STORE=/pkcs11_store
