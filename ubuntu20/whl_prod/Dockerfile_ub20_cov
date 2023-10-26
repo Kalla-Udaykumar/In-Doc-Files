@@ -135,7 +135,10 @@ RUN apt-get install -y \
         default-jre \
         default-jdk \
         sqlite3 \
-        cryptsetup-bin
+        cryptsetup-bin && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+ 
 
 RUN DEBIAN_FRONTEND="noninteractive"
 
