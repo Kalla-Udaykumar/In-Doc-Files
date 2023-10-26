@@ -1,0 +1,222 @@
+# This Dockerfile is used to cov for IPC-STACK Repo
+# FROM BASE IMAGE OF UBUNTU_20.04
+# FROM amr-registry.caas.intel.com/esc-devops/baseline/linux/ubuntu/20.04/abi:20230329-1101
+#FROM amr-registry.caas.intel.com/esc-devops/linux/abi/ubuntu20:20231025_1100
+
+FROM amr-registry.caas.intel.com/esc-devops/baseline/linux/ubuntu/20.04:20201023_1253
+
+#Switch to root
+# USER root
+ 
+#To skip interactive menu during installation
+# ENV DEBIAN_FRONTEND noninteractive
+
+# USER root
+
+# ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt-get update && \
+    apt-get install -y \
+        gawk \
+        wget \
+    		git \
+    		diffstat \
+    		unzip \
+    		texinfo \
+    		gcc \
+    		build-essential \
+    		chrpath \
+    		socat \
+    		cpio \
+    		python3 \
+    		python3-pip \
+        python-dev \
+        python3-dev \
+    		make \
+    		cmake \
+    		python3-pexpect \
+    		xz-utils \
+    		debianutils \
+    		iputils-ping \
+    		python3-git \
+    		python3-jinja2 \
+    		libegl1-mesa \
+    		libsdl1.2-dev \
+    		pylint3 \
+    		xterm \
+    		python3-subunit \
+    		mesa-common-dev \
+    		zstd \
+    		liblz4-tool \
+    		libncurses5-dev \
+    		libtinfo-dev \
+    		patchutils \
+    		vim \
+    		file \
+        connect-proxy \
+        jq \
+        acpica-tools \
+        libssl-dev \
+        dh-autoreconf \
+        git-lfs \
+        automake \
+        gcc-multilib \
+        libtool \
+        whiptail \
+        ca-certificates \
+        zip
+
+RUN apt-get install -y \
+        tzdata \
+        python-setuptools \
+        clang-format \
+        dos2unix \
+        ruby \
+        libglib2.0-dev \
+        libpcap-dev \
+        autoconf \
+        libtool \
+        libssl-dev \
+        gawk \
+        pmount \
+        libc6-dev-i386 \
+        autoconf-archive \
+        libcmocka0 \
+        libcmocka-dev \
+        procps iproute2 \
+        pkg-config \
+        uthash-dev \
+        autoconf \
+        doxygen \
+        libjson-c-dev \
+        libini-config-dev \
+        libcurl4-openssl-dev \
+        libgcrypt-dev \
+        libsqlite3-dev \
+        libyaml-dev \
+        libnss3-tools \
+        expect \
+        wget \
+        tar \
+        python3-pyasn1-modules \
+        opensc-pkcs11 \
+        libp11-dev \
+        opensc \
+        libp11-3 \
+        gnutls-bin \
+        junit \
+        libhamcrest-java \
+        python3-hamcrest \
+        gdb \
+        p11-kit \
+        libp11-kit-dev \
+        net-tools \
+        g++ \
+        m4 \
+        libgcrypt20-dev \
+        gnulib \
+        libdbus-1-dev \
+        libglib2.0-dev \
+        clang-6.0 \
+        clang-tools-6.0 \
+        pandoc \
+        lcov \
+        dbus-x11 \
+        python-yaml \
+        python3-yaml \
+        vim-common \
+        python-cryptography \
+        python3-cryptography \
+        libtasn1-6-dev \
+        socat \
+        libseccomp-dev \
+        libengine-pkcs11-openssl \
+        default-jre \
+        default-jdk \
+        sqlite3 \
+        cryptsetup-bin
+
+RUN DEBIAN_FRONTEND="noninteractive"
+
+RUN git clone https://github.com/tpm2-software/tpm2-pkcs11 \
+    && git clone https://github.com/tpm2-software/tpm2-tss \
+    && git clone https://github.com/tpm2-software/tpm2-abrmd \
+    && git clone https://github.com/tpm2-software/tpm2-tools
+
+WORKDIR tpm2-tss
+RUN ./bootstrap
+RUN ./configure --prefix=/usr
+RUN make -j4
+RUN make install
+ 
+RUN apt-get install -y uuid uuid-dev libuuid1
+ 
+WORKDIR /tpm2-tools
+RUN ./bootstrap
+RUN ./configure
+RUN make -j4
+RUN make install
+ 
+WORKDIR /tpm2-abrmd
+RUN ./bootstrap
+#for native build
+#RUN ./configure --with-dbuspolicydir=/etc/dbus-1/system.d --with-udevrulesdir=/usr/lib/udev/rules.d --with-systemdsystemunitdir=/usr/lib/systemd/system --libdir=/usr/lib64 --prefix=/usr
+ 
+#for docker build
+RUN ./configure --with-dbuspolicydir=/etc/dbus-1/system.d --with-systemdpresetdisable --libdir=/usr/lib
+
+RUN make -j4
+RUN make install
+ 
+WORKDIR /
+RUN wget https://sourceforge.net/projects/ibmswtpm2/files/ibmtpm1563.tar.gz/download -O ibmtpm1563.tar.gz
+RUN mkdir tpm-sim
+RUN tar -xvf ibmtpm1563.tar.gz -C /tpm-sim
+RUN ls -la
+WORKDIR /tpm-sim/src
+RUN make -j4
+ 
+ENV PATH="/tpm-pkcs11/tools:/tpm2-tools/tools:/tpm-sim/src:${PATH}"
+WORKDIR /tpm2-pkcs11
+
+RUN pip3 install pyyaml cryptography
+RUN pip3 install tpm2-pytss
+RUN ./bootstrap
+RUN ./configure --enable-unit
+RUN make -j4
+RUN make install
+
+EXPOSE 2321
+EXPOSE 2322
+# RUN apt install gdb p11-kit libp11-kit-dev -y   # installed in above apt-get
+RUN mkdir -p /var/run/dbus
+
+RUN python3 -m pip install cpp-coveralls pyasn1 pyasn1_modules cffi
+WORKDIR /
+RUN mkdir java
+RUN mkdir pkcs11_store
+WORKDIR /java
+RUN wget --quiet --show-progress --progress=dot:giga -O junit.jar "https://search.maven.org/remotecontent?filepath=junit/junit/4.13/junit-4.13.jar"
+RUN wget --quiet --show-progress --progress=dot:giga -O hamcrest.jar https://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar
+
+ENV CLASSPATH=/java/hamcrest.jar:/java/junit.jar
+
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.21.5/cmake-3.21.5-linux-x86_64.sh
+RUN bash ./cmake-3.21.5-linux-x86_64.sh --prefix=/usr/local/ --exclude-subdir
+
+WORKDIR /
+ 
+#RUN service dbus start
+ENV TPM2_PKCS11_STORE=/pkcs11_store
+
+RUN pip3 install sphinx sphinx_rtd_theme kas==2.5 ruamel.yaml
+
+# Configuration, run bash interpreter by default
+CMD ["/bin/bash"]
+
+#Renable interactive menu
+# ENV DEBIAN_FRONTEND=dialog
+ 
+#Switch back to user
+# USER lab_bldmstr
+# CMD /bin/bash
