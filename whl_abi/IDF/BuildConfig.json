@@ -1,0 +1,87 @@
+{
+    "IngredientName": "adln-office-automation",
+    "Description": "IDF ABI Project Config File for ADLN OFFICE AUTOMATION Ingredient",
+    "OutputConfiguration": "idf/PackageGen.json",
+    "OutputRoot": "OWRBin",
+    "OutputDir": "OWRBuild",
+    "PackageRoot": "OWRPackage",
+    "PackageMetadataTemplate": "idf/PackageMetadataTemplate.json",
+    "BuildInfo":{
+        "Name":"Test_setup",
+        "FullName":"",
+        "SDL": [
+            {
+                "ID": "",
+                "URL": "",
+                "Submitter": "lab_bldmstr"
+            }
+        ],
+        "ServerURL":"https://onebkc.intel.com",
+        "Type":"onebkc"
+    },
+    "BinaryScan": {
+        "ServerURL": "https://bdba001.icloud.intel.com",
+        "ServerGroup": "52"
+    },
+    "Klocwork": {
+        "ServerURL": "https://klocwork-png7.devtools.intel.com",
+        "ServerPort": "8105",
+        "LicenseHost": "klocwork05p.elic.intel.com",
+        "LicensePort": "7500",
+        "Project": "ADLN-LIN-OFFICE_AUTOMATION",
+        "OutputConfiguration": "",
+        "OnErrorContinueAnalysis":true,
+        "OverWriteDuplicates": true
+    },
+    "SubComponents": [
+        {
+            "Name": "adln-office-automation",
+            "Description": "ADLN OFFICE AUTOMATION Script App",
+            "ProjectFile": "./build.sh",
+            "ProjectType": "Script",
+            "WorkingDirectory": "idf",
+            "AdditionalFlags": "",
+            "AdditionalEnvVars": "",
+            "Klocwork": {
+                "SkipKlocworkScan": true
+            },
+            "Coverity":{
+                "SkipCoverityScan": true
+            }
+        },
+        {
+            "Name": "kw-adln-office-automation",
+            "Description": "ADLN OFFICE AUTOMATION Script App for KW",
+            "ProjectFile": "./kw_build.sh",
+            "ProjectType": "Script",
+            "WorkingDirectory": "idf",
+            "AdditionalFlags": "",
+            "AdditionalEnvVars": "",
+            "Klocwork":{
+                "Project":"ADLN-LIN-OFFICE_AUTOMATION",
+                "Type":"cpp"
+            },
+            "Coverity":{
+                "SkipCoverityScan": true
+            }
+        },
+        {
+            "Name": "cov-adln-office-automation",
+            "Description": "WHL LIN IPC STACK Script App for COV",
+            "ProjectFile": "./cov_build.sh",
+            "ProjectType": "Script",
+            "WorkingDirectory": "idf",
+            "AdditionalFlags": "",
+            "AdditionalEnvVars": "",
+            "Coverity":{
+                "Stream": "ENV:CoverityStream",
+                "CompilerTemplates":["cs","msvc"],
+                "SkipCoverityScan": false
+            },
+            "Klocwork":{
+                "SkipKlocworkScan": true
+            }
+        }
+    ],    
+    "SchemaVersion": "1.0"
+}
