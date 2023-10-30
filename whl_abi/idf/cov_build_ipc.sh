@@ -1,5 +1,5 @@
 #!/bin/bash
-cd ${WORKSPACE}/abi/meta-tep-ipc-stack
+cd ${WORKSPACE}/abi/bandit/meta-tep-ipc-stack
 ./bootstrap
 cd ipc_stack/grpc
 mkdir build
