@@ -9,19 +9,19 @@
     "VulnerabilityScan": {
         "ServerURL": "https://snyk.devtools.intel.com/api"
     },
-    /"Protex": {
+    /*"Protex": {
         "Server": "amrprotex004.devtools.intel.com",
         "ProjectID": "c_training1_20169"
-    },
+    },*/
     "BinaryScan": {
         "ServerURL": "https://bdba001.icloud.intel.com",
         "ServerGroup": "52"
     },
-    "StaticSecurityScan": {
+   /* "StaticSecurityScan": {
         "ServerURL": "https://sast.intel.com",
         "ProjectID": "336687",
         "IsPublic": true
-    },
+    },*/
     "SubComponents": [
         {
             "Name": "whl_build",
