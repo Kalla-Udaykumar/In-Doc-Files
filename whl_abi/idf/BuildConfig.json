@@ -9,7 +9,7 @@
     "VulnerabilityScan": {
         "ServerURL": "https://snyk.devtools.intel.com/api"
     },
-    "Protex": {
+    /"Protex": {
         "Server": "amrprotex004.devtools.intel.com",
         "ProjectID": "c_training1_20169"
     },
