@@ -338,7 +338,7 @@ pipeline {
             steps {
                 script {
                     //upload to artifactory
-                    abi_artifact_deploy custom_file: "${REPORTS_DIR}",custom_deploy_path: "pse-tgl-local/psd/${DATETIME}/QA-Reports", custom_artifactory_url: "https://ubit-artifactory-ba.intel.com", additional_props: "retention.days=365", cred_id: 'BuildAutomation'
+                    abi_artifact_deploy custom_file: "${REPORTS_DIR}",custom_deploy_path: "pse-tgl-local/psd/Test/${DATETIME}/QA-Reports", custom_artifactory_url: "https://ubit-artifactory-ba.intel.com", additional_props: "retention.days=2", cred_id: 'BuildAutomation'
                 }
             }
         }     
