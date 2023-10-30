@@ -1,0 +1,94 @@
+#!groovy
+@Library('abi') _
+
+import owm.common.BuildInfo
+Map buildinfo = BuildInfo.instance.data
+
+linuxcloudName = 'gar-png-nswe-sws-ada'
+
+def podDefinitionYaml = """
+kind: Pod
+apiVersion: v1
+spec:
+  volumes:
+    - name: nfs
+      persistentVolumeClaim:
+        claimName: png-nfs
+    - name: repo-tool
+      persistentVolumeClaim:
+        claimName: repotool
+    - name: github-config
+      secret:
+        secretName: gitconfig
+    - name: sshkeys
+      secret:
+        secretName: ssh-keys
+    - name: netrc-lab
+      secret:
+        secretName: netrc
+    - name: lab-ltoken
+      secret:
+        secretName: lab-ltoken
+  nodeSelector:
+    platform: ESC
+  containers:
+  - name: jnlp
+    image: amr-registry.caas.intel.com/owr/iotg/labbldmstr_iotg_jnlp_lnx:latest
+    env:
+      - name: KUB_NODE_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: spec.nodeName
+    tty: true
+    imagePullPolicy: Always
+    securityContext:
+      runAsUser: 44051
+  - name: build-environment1
+    image: amr-registry.caas.intel.com/esc-devops/plat/ehl/lin/tsn/ubuntu20:20230725-1050
+    resources:
+      requests:
+        cpu: "8.0"
+        memory: "16Gi"
+      limits:
+        cpu: "9.0"
+        memory: "18Gi"
+    env:
+      - name: KUB_NODE_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: spec.nodeName
+    tty: true
+    imagePullPolicy: Always
+    securityContext:
+      runAsUser: 44051
+    command:
+    - /bin/bash
+    args:
+    - -c
+    - sleep 36000
+    volumeMounts:
+    - name: nfs
+      mountPath: "/build/tools"
+    - mountPath: "/home/lab_bldmstr/.gitconfig"
+      name: github-config
+      subPath: ".gitconfig"
+    - mountPath: "/home/lab_bldmstr/.ssh/"
+      name: sshkeys
+    - name: netrc-lab
+      mountPath: "/home/lab_bldmstr/.netrc"
+      subPath: ".netrc"
+    - name: repo-tool
+      mountPath: "/home/lab_bldmstr/bin"
+    - name: lab-ltoken
+      mountPath: "/home/lab_bldmstr/.klocwork/ltoken"
+      subPath: "ltoken"
+"""
+
+def print_node_name() {
+	println("POD running on === ${KUB_NODE_NAME} === worker machine")
+}
+
+
+pipeline {
+  
+}
