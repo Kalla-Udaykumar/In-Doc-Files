@@ -90,5 +90,262 @@ def print_node_name() {
 
 
 pipeline {
-  
+  agent {
+        kubernetes {
+            cloud linuxcloudName
+            defaultContainer 'build-environment1'
+            label "linux-builds-${env.JOB_BASE_NAME}-${UUID.randomUUID().toString()}"
+            slaveConnectTimeout '600000'
+            yaml podDefinitionYaml
+		}
+    }
+    environment {
+        BuildVersion = "1.0.000"
+        ABI_CONTAINER = false
+        DATE = new Date().format("yyyyMMdd_HH_mm");
+        TRIVY_IMG = "trusted_container:latest"
+    }
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '90', artifactDaysToKeepStr: '30'))
+        skipDefaultCheckout()
+    }
+    parameters {
+        booleanParam(name: 'EMAIL', defaultValue: true, description: 'Email notification upon job completion')
+    }
+
+    stages {
+        stage('SCM') {
+            steps {
+                parallel (
+                    "meta-tep-build": {
+                    checkout changelog: false, scm: ([$class: 'GitSCM',
+                    userRemoteConfigs: [[credentialsId: 'GitHub-Token', url: 'https://github.com/intel-innersource/os.security.tep.meta-tep-build-setup.git']],
+                    branches: [[name: "${branch_identifier}"]],
+                    extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'meta-tep-build-setup'],
+                    [$class: 'ScmName', name: 'os.security.tep.meta-tep-build-setup'],
+                    [$class: 'CloneOption', timeout: 60],
+                    [$class: 'CleanBeforeCheckout'], 
+                    [$class: 'CheckoutOption', timeout: 60]]])
+                    },
+                    "tep-acrn": {
+                    checkout changelog: false, scm: ([$class: 'GitSCM',
+                    userRemoteConfigs: [[credentialsId: 'GitHub-Token', url: 'https://github.com/intel-innersource/os.security.tep.meta-tep-acrn']],
+                    branches: [[name: "master"]],
+                    extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'abi/bandit/meta-tep-acrn'],
+                    [$class: 'ScmName', name: 'os.security.tep.meta-tep-kvm'],
+                    [$class: 'CloneOption', timeout: 60],
+                    [$class: 'CleanBeforeCheckout'], 
+                    [$class: 'CheckoutOption', timeout: 60]]])
+                    },
+                    "tep-container": {
+                    checkout changelog: false, scm: ([$class: 'GitSCM',
+                    userRemoteConfigs: [[credentialsId: 'GitHub-Token', url: 'https://github.com/intel-innersource/os.security.tep.meta-tep-container']],
+                    branches: [[name: "master"]],
+                    extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'abi/bandit/meta-tep-container'],
+                    [$class: 'ScmName', name: 'os.security.tep.meta-tep-kvm'],
+                    [$class: 'CloneOption', timeout: 60],
+                    [$class: 'CleanBeforeCheckout'], 
+                    [$class: 'CheckoutOption', timeout: 60]]])
+                    },
+                    "tep-trusted-os": {
+                    checkout changelog: false, scm: ([$class: 'GitSCM',
+                    userRemoteConfigs: [[credentialsId: 'GitHub-Token', url: 'https://github.com/intel-innersource/os.security.tep.meta-tep-trusted-os']],
+                    branches: [[name: "master"]],
+                    extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'abi/bandit/meta-tep-trusted-os'],
+                    [$class: 'ScmName', name: 'os.security.tep.meta-tep-kvm'],
+                    [$class: 'CloneOption', timeout: 60],
+                    [$class: 'CleanBeforeCheckout'], 
+                    [$class: 'CheckoutOption', timeout: 60]]])
+                    },
+                    "tep-ipc-stack": {
+                    checkout changelog: false, scm: ([$class: 'GitSCM',
+                    userRemoteConfigs: [[credentialsId: 'GitHub-Token', url: 'https://github.com/intel-innersource/libraries.security.tep.tep-ipc-stack']],
+                    branches: [[name: "master"]],
+                    extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'abi/bandit/meta-tep-ipc-stack'],
+                    [$class: 'ScmName', name: 'os.security.tep.meta-tep-kvm'],
+                    [$class: 'CloneOption', timeout: 60],
+                    [$class: 'CleanBeforeCheckout'], 
+                    [$class: 'CheckoutOption', timeout: 60]]])
+                    },
+                    "tep-kvm": {
+                    checkout changelog: false, scm: ([$class: 'GitSCM',
+                    userRemoteConfigs: [[credentialsId: 'GitHub-Token', url: 'https://github.com/intel-innersource/os.security.tep.meta-tep-kvm.git']],
+                    branches: [[name: "${branch_identifier}"]],
+                    extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'abi/bandit/meta-tep-kvm'],
+                    [$class: 'ScmName', name: 'os.security.tep.meta-tep-kvm'],
+                    [$class: 'CloneOption', timeout: 60],
+                    [$class: 'CleanBeforeCheckout'], 
+                    [$class: 'CheckoutOption', timeout: 60]]])
+                    },
+                    "esc-engservices": {
+                    checkout changelog: false, scm: ([$class: 'GitSCM',
+                    userRemoteConfigs: [[credentialsId: 'GitHub-Token', url: 'https://github.com/intel-innersource/libraries.devops.henosis.build.automation.services.git']],
+                    branches: [[name: 'refs/heads/master']],
+                    extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'esc-engservices'],
+                    [$class: 'ScmName', name: 'esc-engservices'],
+                    [$class: 'CloneOption', timeout: 60],
+                    [$class: 'CleanBeforeCheckout'], 
+                    [$class: 'CheckoutOption', timeout: 60]]])
+                    },
+                    "dependabot-repo": {
+                        checkout([$class: 'GitSCM',
+                        userRemoteConfigs: [[credentialsId: 'GitHub-Token', url: 'https://github.com/intel-innersource/applications.security.sdl.dependabot']],
+                        branches: [[name: 'master']],
+                        extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'dependabot-repo'],
+                        [$class: 'ScmName', name: 'dependabot-repo'],
+                        [$class: 'CloneOption', timeout: 60],
+                        [$class: 'CleanBeforeCheckout'],
+                        [$class: 'CheckoutOption', timeout: 60]]])
+                    },
+                    "henosis": {
+                    checkout([$class: 'GitSCM',
+                    userRemoteConfigs: [[credentialsId: 'GitHub-Token', url: 'https://github.com/intel-innersource/libraries.devops.jenkins.cac.git']],
+                    branches: [[name: 'refs/heads/master']],
+                    extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'henosis'],
+                    [$class: 'ScmName', name: 'henosis'],
+                    [$class: 'CleanBeforeCheckout'],
+                    [$class: 'CloneOption', timeout: 60],
+                    [$class: 'CheckoutOption', timeout: 60]]])
+                    }
+                )
+            }
+        }
+
+        stage ('ABI') {
+            steps {
+                script {
+                    abi.shell("cp -r ${WORKSPACE}/abi/henosis/cac/ehl/lin/tsn/sdle ${WORKSPACE}/abi")
+                    PrepareWS()
+                } 
+            }
+        }
+
+        stage ('COVERITY') {
+            steps {
+                script {
+                    env.CoverityStream = "WHL_LIN_TRUSTEDEDGE"
+                    abi.shell("mkdir -p /OWR/Tools/coverity/2022.3.1/")
+                    abi.shell("mkdir -p /OWR/Tools/cov_report/2022.3.1/")
+                    abi.shell("cp -r /build/tools/engsrv/tools/coverity-analyze/. /OWR/Tools/coverity/2022.3.1/")
+                    abi.shell("cp -r /build/tools/engsrv/tools/coverity-reports/. /OWR/Tools/cov_report/2022.3.1/")
+                    //Enable coverity scan
+                    abi_coverity_analyze server: 'https://coverityent.devtools.intel.com/prod8', stream: env.CoverityStream, version: env.BuildVersion, auditreport: true        
+                }
+            }
+        }
+
+        stage('QA:BDBA') {
+            steps{
+                script {
+                    dir("${WORKSPACE}/abi/OWRBin/") {
+                        zip(zipFile: "${WORKSPACE}/abi/${JOB_BASE_NAME}.zip")
+                    }
+                    abi_scan_binary timeout: 2000, zip_file: "${WORKSPACE}/abi/${JOB_BASE_NAME}.zip", wait: true, report_name: "BDBA_WHL_LIN_TRUSTEDEDGE", auditreport: true          
+                }
+            }
+        }
+
+        stage('TRIVY') {
+            agent {
+                node {
+                    label 'TCaaS-DOCKER1-UB22'
+                }
+            }
+            steps {
+                script {
+                    /*docker pull ${TRIVY_IMG} -- when you are pulling image from Harbor registry 
+                    Sample Job: https://github.com/intel-innersource/libraries.devops.jenkins.cac/blob/9ede8ed77af2b9bdb3dbcf48bc3eed2f14dbc7e8/cac/edgebox/lin/telemetry/Jenkinsfile_abi.odm#L241 */
+                    sh"""
+                        docker run --rm -v ${WORKSPACE}:${WORKSPACE} -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image -f table -o ${WORKSPACE}/TRIVY_trusted_container_report.txt ${TRIVY_IMG}
+                    """
+                }
+            }
+        }
+
+        stage('BANDIT') {
+            steps {
+                //Enable Bandit scan with ABI   --- https://github.com/intel-innersource/libraries.devops.jenkins.cac/blob/9ede8ed77af2b9bdb3dbcf48bc3eed2f14dbc7e8/cac/gen/lin/psd/Jenkinsfile.qa.abi#L194
+                abi_scan_bandit target: "abi/bandit/", reportname: "bandit_Debian_repos", auditreport: true
+            }
+        }
+
+        stage('DEPENDABOT') {
+            steps{
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'GitHub-Token', passwordVariable: 'BDPWD', usernameVariable: 'BDUSR')]) {
+                    sh"""
+                    cd ${WORKSPACE}/dependabot-repo/Evidence
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    python3 -m pip install --upgrade pip
+                    pip3 install requests
+                    pip3 install future
+                    pip3 install json2txttree
+                    python3 generate_evidence.py -r "intel-innersource/os.security.tep.meta-tep-acrn" -t ${BDPWD} >> ${WORKSPACE}/dependabot_tep_acrn_report.csv
+                    python3 generate_evidence.py -r "intel-innersource/os.security.tep.meta-tep-container" -t ${BDPWD} >> ${WORKSPACE}/dependabot_tep_container_report.csv
+                    python3 generate_evidence.py -r "intel-innersource/os.security.tep.meta-tep-trusted-os" -t ${BDPWD} >> ${WORKSPACE}/dependabot_tep_trusted_os_report.csv
+                    python3 generate_evidence.py -r "intel-innersource/libraries.security.tep.tep-ipc-stack" -t ${BDPWD} >> ${WORKSPACE}/dependabot_tep_ipc_stack.csv
+                    python3 generate_evidence.py -r "intel-innersource/os.security.tep.meta-tep-kvm" -t ${BDPWD} >> ${WORKSPACE}/dependabot_tep_kvm_report.csv
+                    deactivate
+                    """
+                    }
+                }   
+            }
+        }
+
+        stage("QA: VIRUS SCAN"){
+            steps {
+                script {
+                    sh """ 
+                        cp -R ${WORKSPACE}/abi/hwrotdiscovery/OWRBuild/protex/*.xlsx ${WORKSPACE}/abi/upload/
+                        cp -r ${WORKSPACE}/abi/OWRBuild/cov-int_${env.CoverityStream}/${env.CoverityStream}/*.pdf ${WORKSPACE}/abi/upload 
+                        cp -r ${WORKSPACE}/abi/OWRBuild/cov-int_${env.CoverityStream}/output/summary.txt ${WORKSPACE}/abi/upload """
+                        //enable virus scan with ABI
+                        abi_scan_virus reportname: "GEN-LIN-PSD", target: "${WORKSPACE}/abi/upload", auditreport: true
+                        sh """ cp -R ${WORKSPACE}/abi/hwrotdiscovery/OWRBin/Documents/VirusScan ${WORKSPACE}/abi/upload/ """ 
+                    }   
+                } 
+            }
+        stage("PUBLISH") {
+            steps {
+                script {
+                    //upload to artifactory
+                    abi_artifact_deploy custom_file: "${REPORTS_DIR}",custom_deploy_path: "pse-tgl-local/psd/${DATETIME}/QA-Reports", custom_artifactory_url: "https://ubit-artifactory-ba.intel.com", additional_props: "retention.days=365", cred_id: 'BuildAutomation'
+                }
+            }
+        }     
+
+    }
+}
+ // https://github.com/intel-innersource/libraries.devops.jenkins.cac/blob/9ede8ed77af2b9bdb3dbcf48bc3eed2f14dbc7e8/cac/gen/lin/psd/Jenkinsfile.qa.abi#L194
+void PrepareWS(String BuildConfig="idf/BuildConfig.json") {
+    log.Debug("Enter")
+
+    log.Info("This build is running on Node:${env.NODE_NAME} WorkSpace: ${env.WORKSPACE}")
+
+    abi_setup_proxy()
+
+    abi_init config: BuildConfig, ingPath: "abi", checkoutPath: "abi", skipCheckout: true
+
+    def ctx
+    ctx = abi_get_current_context()
+    ctx['IngredientVersion'] = env.BuildVersion
+    abi_set_current_context(ctx)
+
+    log.Debug("Exit")
+}
+
+void set_custom_artifactpkg_name(String ArtifactPkgName) {
+    log.Debug("Enter")
+
+    def ctx
+    // Define custom package name for Artifacts
+    ctx = abi_get_current_context()
+    custom_name = ["ArtifactPackageFile" : "", "ArtifactPackageName" : ArtifactPkgName, "Type" : "ArtifactGen"]
+    ctx['Outputs'].add(custom_name)
+    abi_set_current_context(ctx)
+
+    log.Debug("Exit")
 }
