@@ -36,7 +36,7 @@
             "AdditionalFlags": "",
             "AdditionalEnvVars": "",
             "Coverity":{
-                "Stream": "ENV:CoverityStream",
+                "Stream": "ENV:CoverityStream1",
                 "SkipCoverityScan": false
             }
         },
