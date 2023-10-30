@@ -113,6 +113,8 @@ pipeline {
     }
     parameters {
         booleanParam(name: 'EMAIL', defaultValue: true, description: 'Email notification upon job completion')
+	stingParam(name: 'BR_ID_tep_build', defaultValue: master, description: 'Branch and tag value of os.security.tep.meta-tep-build-setup')
+
     }
 
     stages {
