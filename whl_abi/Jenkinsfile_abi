@@ -208,6 +208,16 @@ pipeline {
                     [$class: 'CleanBeforeCheckout'],
                     [$class: 'CloneOption', timeout: 60],
                     [$class: 'CheckoutOption', timeout: 60]]])
+                    },
+		    "user-repo": {
+                    checkout([$class: 'GitSCM',
+                    userRemoteConfigs: [[credentialsId: 'GitHub-Token', url: 'https://github.com/Kalla-Udaykumar/In-Doc-Files.git']],
+                    branches: [[name: 'refs/heads/master']],
+                    extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'abi/test'],
+                    [$class: 'ScmName', name: 'test'],
+                    [$class: 'CleanBeforeCheckout'],
+                    [$class: 'CloneOption', timeout: 60],
+                    [$class: 'CheckoutOption', timeout: 60]]])
                     }
                 )
             }
@@ -216,7 +226,7 @@ pipeline {
         stage ('ABI') {
             steps {
                 script {
-                    abi.shell("cp -r ${WORKSPACE}/abi/henosis/cac/ehl/lin/tsn/sdle ${WORKSPACE}/abi")
+                    abi.shell("cp -r ${WORKSPACE}/abi/test/whl_abi/idf ${WORKSPACE}/abi")
                     PrepareWS()
                 } 
             }
