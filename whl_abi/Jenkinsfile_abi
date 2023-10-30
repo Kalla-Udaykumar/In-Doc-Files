@@ -222,16 +222,30 @@ pipeline {
             }
         }
 
-        stage ('COVERITY') {
+        stage ('IPC_STACK-COVERITY') {
             steps {
                 script {
-                    env.CoverityStream = "WHL_LIN_TRUSTEDEDGE"
+                    env.CoverityStream = "TEP_IPC_STACK"
                     abi.shell("mkdir -p /OWR/Tools/coverity/2022.3.1/")
                     abi.shell("mkdir -p /OWR/Tools/cov_report/2022.3.1/")
                     abi.shell("cp -r /build/tools/engsrv/tools/coverity-analyze/. /OWR/Tools/coverity/2022.3.1/")
                     abi.shell("cp -r /build/tools/engsrv/tools/coverity-reports/. /OWR/Tools/cov_report/2022.3.1/")
                     //Enable coverity scan
-                    abi_coverity_analyze server: 'https://coverityent.devtools.intel.com/prod8', stream: env.CoverityStream, version: env.BuildVersion, auditreport: true        
+                    abi_coverity_analyze server: 'https://coverityent.devtools.intel.com/prod8', stream: env.CoverityStream1, version: env.BuildVersion, auditreport: true        
+                }
+            }
+        }
+
+	stage ('YOCTO-COVERITY') {
+            steps {
+                script {
+                    env.CoverityStream = "WHL_LIN_TRUSTEDEDG"
+                    abi.shell("mkdir -p /OWR/Tools/coverity/2022.3.1/")
+                    abi.shell("mkdir -p /OWR/Tools/cov_report/2022.3.1/")
+                    abi.shell("cp -r /build/tools/engsrv/tools/coverity-analyze/. /OWR/Tools/coverity/2022.3.1/")
+                    abi.shell("cp -r /build/tools/engsrv/tools/coverity-reports/. /OWR/Tools/cov_report/2022.3.1/")
+                    //Enable coverity scan
+                    abi_coverity_analyze server: 'https://coverityent.devtools.intel.com/prod8', stream: env.CoverityStream2, version: env.BuildVersion, auditreport: true        
                 }
             }
         }
