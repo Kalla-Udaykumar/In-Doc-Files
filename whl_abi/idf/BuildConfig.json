@@ -1,6 +1,6 @@
 {
-    "IngredientName": "gen-lin-intel.dist.weston",
-    "Description": "IDF ABI Project Config File for GEN-LIN-INTEL.DIST.WESTON Ingredient",
+    "IngredientName": "whl-lin-trustedge",
+    "Description": "IDF ABI Project Config File for WHL LIN TRUSTEDGE Ingredient",
     "OutputConfiguration": "idf/PackageGen.json",
     "OutputRoot": "OWRBin",
     "OutputDir": "OWRBuild",
@@ -9,46 +9,49 @@
     "VulnerabilityScan": {
         "ServerURL": "https://snyk.devtools.intel.com/api"
     },
-    /*"Protex": {
-        "Server": "amrprotex004.devtools.intel.com",
-        "ProjectID": "c_training1_20169"
-    },*/
     "BinaryScan": {
         "ServerURL": "https://bdba001.icloud.intel.com",
         "ServerGroup": "52"
     },
-   /* "StaticSecurityScan": {
-        "ServerURL": "https://sast.intel.com",
-        "ProjectID": "336687",
-        "IsPublic": true
-    },*/
     "SubComponents": [
         {
             "Name": "whl_build",
-            "Description": "GEN-LIN-INTEL.DIST.WESTON Script App",
+            "Description": "WHL-LIN-TRUSTEDGE Script App",
             "ProjectFile": "./build.sh",
             "ProjectType": "Script",
             "WorkingDirectory": "idf",
             "AdditionalFlags": "",
             "AdditionalEnvVars": "",
             "Klocwork":{
-                "Project":"GEN-LIN-INTEL.DIST.WESTON",
+                "Project":"WHL-LIN-TRUSTEDGE",
                 "Type":"cpp"
             }
         },
         {
             "Name": "ipc_stack coverity",
             "Description": " IPC_STACK Build Compilation",
-            "ProjectFile": "./cov_build.sh",
+            "ProjectFile": "./cov_build_ipc.sh",
             "ProjectType": "Script",
             "WorkingDirectory": "idf",
             "AdditionalFlags": "",
             "AdditionalEnvVars": "",
             "Coverity":{
-                "Stream": "ENV:CoverityStream",
+                "Stream": "ENV:CoverityStream1",
                 "SkipCoverityScan": false
             }
-
+        },
+        {
+            "Name": "yocto coverity",
+            "Description": "Yocto Build Compilation",
+            "ProjectFile": "./cov_build_yocto.sh",
+            "ProjectType": "Script",
+            "WorkingDirectory": "idf",
+            "AdditionalFlags": "",
+            "AdditionalEnvVars": "",
+            "Coverity":{
+                "Stream": "ENV:CoverityStream2",
+                "SkipCoverityScan": false
+            }
         }
     ],    
     "SchemaVersion": "1.0"
