@@ -44,7 +44,7 @@ spec:
     securityContext:
       runAsUser: 44051
   - name: build-environment1
-    image: amr-registry.caas.intel.com/esc-devops/plat/ehl/lin/tsn/ubuntu20:20230725-1050
+    image: amr-registry.caas.intel.com/esc-devops/plat/gen/lin/teprel/ubuntu2004:20231030_1734
     resources:
       requests:
         cpu: "8.0"
