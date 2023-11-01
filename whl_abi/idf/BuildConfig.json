@@ -30,26 +30,26 @@
         {
             "Name": "ipc_stack coverity",
             "Description": " IPC_STACK Build Compilation",
-            "ProjectFile": "./cov_build_ipc.sh",
+            "ProjectFile": "./ipc_cov.sh",
             "ProjectType": "Script",
             "WorkingDirectory": "idf",
             "AdditionalFlags": "",
             "AdditionalEnvVars": "",
             "Coverity":{
-                "Stream": "ENV:CoverityStream1",
+                "Stream": "ENV:CoverityStreamIpc",
                 "SkipCoverityScan": false
             }
         },
         {
             "Name": "yocto coverity",
             "Description": "Yocto Build Compilation",
-            "ProjectFile": "./cov_build_yocto.sh",
+            "ProjectFile": "./yocto_cov.sh",
             "ProjectType": "Script",
             "WorkingDirectory": "idf",
             "AdditionalFlags": "",
             "AdditionalEnvVars": "",
             "Coverity":{
-                "Stream": "ENV:CoverityStream2",
+                "Stream": "ENV:CoverityStreamYocto",
                 "SkipCoverityScan": false
             }
         }
