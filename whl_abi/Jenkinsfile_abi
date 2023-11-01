@@ -124,7 +124,7 @@ pipeline {
                     "meta-tep-build": {
                     checkout changelog: false, scm: ([$class: 'GitSCM',
                     userRemoteConfigs: [[credentialsId: 'GitHub-Token', url: 'https://github.com/intel-innersource/os.security.tep.meta-tep-build-setup.git']],
-                    branches: [[name: "${branch_identifier}"]],
+                    branches: [[name: "master"]],
                     extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'meta-tep-build-setup'],
                     [$class: 'ScmName', name: 'os.security.tep.meta-tep-build-setup'],
                     [$class: 'CloneOption', timeout: 60],
@@ -174,7 +174,7 @@ pipeline {
                     "tep-kvm": {
                     checkout changelog: false, scm: ([$class: 'GitSCM',
                     userRemoteConfigs: [[credentialsId: 'GitHub-Token', url: 'https://github.com/intel-innersource/os.security.tep.meta-tep-kvm.git']],
-                    branches: [[name: "${branch_identifier}"]],
+                    branches: [[name: "master"]],
                     extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'abi/bandit/meta-tep-kvm'],
                     [$class: 'ScmName', name: 'os.security.tep.meta-tep-kvm'],
                     [$class: 'CloneOption', timeout: 60],
