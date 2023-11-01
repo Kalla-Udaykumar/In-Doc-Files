@@ -325,12 +325,11 @@ pipeline {
             steps {
                 script {
                     sh """ 
-                        cp -R ${WORKSPACE}/abi/hwrotdiscovery/OWRBuild/protex/*.xlsx ${WORKSPACE}/abi/upload/
-                        cp -r ${WORKSPACE}/abi/OWRBuild/cov-int_${env.CoverityStream}/${env.CoverityStream}/*.pdf ${WORKSPACE}/abi/upload 
-                        cp -r ${WORKSPACE}/abi/OWRBuild/cov-int_${env.CoverityStream}/output/summary.txt ${WORKSPACE}/abi/upload """
+                        cp -r ${WORKSPACE}/abi/OWRBuild/cov-int_${env.CoverityStreamIpc}/${env.CoverityStreamIpc}/*.pdf ${WORKSPACE}/abi/upload 
+                        cp -r ${WORKSPACE}/abi/OWRBuild/cov-int_${env.CoverityStreamIpc}/output/summary.txt ${WORKSPACE}/abi/upload """
                         //enable virus scan with ABI
-                        abi_scan_virus reportname: "GEN-LIN-PSD", target: "${WORKSPACE}/abi/upload", auditreport: true
-                        sh """ cp -R ${WORKSPACE}/abi/hwrotdiscovery/OWRBin/Documents/VirusScan ${WORKSPACE}/abi/upload/ """ 
+                        abi_scan_virus reportname: "WHL-LIN-TRUSTEDGE", target: "${WORKSPACE}/abi/upload", auditreport: true
+                        sh """ cp -R ${WORKSPACE}/abi/OWRBin/Documents/VirusScan ${WORKSPACE}/abi/upload/ """ 
                     }   
                 } 
             }
