@@ -1,0 +1,47 @@
+#!groovy
+@Library('abi') _
+
+import owm.common.BuildInfo
+Map buildinfo = BuildInfo.instance.data
+
+def ipc_stack_repo() {
+    checkout changelog: false, scm: ([$class: 'GitSCM',
+    userRemoteConfigs: [[credentialsId: 'GitHub-Token', url: 'https://github.com/intel-innersource/libraries.security.tep.tep-ipc-stack']],
+    branches: [[name: "master"]],
+    extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'meta-tep-ipc-stack'],
+    [$class: 'ScmName', name: 'os.security.tep.meta-tep-kvm'],
+    [$class: 'CloneOption', timeout: 60],
+    [$class: 'CleanBeforeCheckout'], 
+    [$class: 'CheckoutOption', timeout: 60]]])
+}
+
+pipeline {
+
+  agent {
+      node {
+          label 'ESC-DOCKER3-SLES12'
+      }
+  }
+
+  environment {
+      DATETIME = new Date().format("yyyyMMdd-HHmm");
+      BDBA_SCAN_DIR = "BDBA_SCAN";
+      YEAR = new Date().format("yyyy")
+      WW = new Date().format("ww")
+      BuildVersion = "1.0.000"
+      ABI_CONTAINER = false
+      DATE = new Date().format("yyyyMMdd_HH_mm");
+      TRIVY_IMG = "trusted_container:latest"
+  }
+
+  options {
+        timestamps()
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '90', artifactDaysToKeepStr: '30'))
+        skipDefaultCheckout()
+  }
+
+  
+
+  
+}
