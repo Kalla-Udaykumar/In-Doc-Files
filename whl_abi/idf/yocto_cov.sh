@@ -1,4 +1,7 @@
 #!/bin/bash
+export http_proxy=http://proxy-dmz.intel.com:912
+export https_proxy=http://proxy-dmz.intel.com:912
+export no_proxy=intel.com,.intel.com,10.0.0.0/8,192.168.0.0/16,localhost,.local,127.0.0.0/8,134.134.0.0/16
 cd ${WORKSPACE}/meta-tep-build-setup
 ./setup.sh tep-container --options --manual
 cd unified_build/tep-container
