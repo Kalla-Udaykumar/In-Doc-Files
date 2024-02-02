@@ -1,0 +1,310 @@
+# UBUNTU 22 IMAGE from trusted registry
+FROM amr-registry.caas.intel.com/esc-devops/baseline/linux/ubuntu/22.04:20221125_1521
+
+ENV HTTP_PROXY "http://proxy.png.intel.com:911"
+ENV HTTPS_PROXY "http://proxy.png.intel.com:912"
+ENV NO_PROXY "127.0.0.1,localhost,intel.com,.intel.com,af01p-png.devtools.intel.com,10.34.40.193,10.34.42.14,10.221.253.199"
+ENV http_proxy "http://proxy.png.intel.com:911"
+ENV https_proxy "http://proxy.png.intel.com:912"
+ENV no_proxy "127.0.0.1,localhost,intel.com,.intel.com,af01p-png.devtools.intel.com,10.34.40.193,10.34.42.14,10.221.253.199"
+
+# Install dependences
+# Bootstrap
+RUN apt-get update ; true
+RUN apt-get install -y ca-certificates gpg wget
+RUN apt-get update
+
+# components
+RUN env DEBIAN_FRONTEND=noninteractive apt-get install -y zlib1g-dev libncurses5-dev gpg-agent libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev libbz2-dev -y default-jre docker-compose flex git git-lfs gnuplot intel-gpu-tools lbzip2 libtool make mc mosquitto mosquitto-clients openssl curl llvm pciutils python3-pandas python3-pip python3-seaborn qemu-kvm software-properties-common terminator vim wmctrl i2c-tools xdotool gnupg lsb-release intel-igc-core intel-igc-opencl intel-opencl-icd intel-level-zero-gpu
+RUN env DEBIAN_FRONTEND=noninteractive apt-get install -y libglew-dev libglm-dev libsdl2-dev libswscale-dev g++-10 gcc-10 adb apt-transport-https autoconf automake bison
+
+# install dep
+RUN env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    unzip \
+    sudo \
+    meson \
+    ninja-build \
+    cmake \
+    pkg-config \
+    libpciaccess-dev \
+    cpio \
+    wayland-protocols \
+    intel-gmmlib=22.3* \
+		ocl-icd-libopencl1 \
+		net-tools \
+		gir1.2-gst-plugins-bad-1.0 \
+		gir1.2-gst-plugins-base-1.0 \
+		gir1.2-gstreamer-1.0 \
+		gir1.2-gst-rtsp-server-1.0 \
+		gstreamer1.0-alsa \
+		gstreamer1.0-gl \
+		gstreamer1.0-gtk3 \
+		gstreamer1.0-opencv \
+		gstreamer1.0-plugins-bad \
+		gstreamer1.0-plugins-bad-apps \
+		gstreamer1.0-plugins-base \
+		gstreamer1.0-plugins-base-apps \
+		gstreamer1.0-plugins-good \
+		gstreamer1.0-plugins-ugly \
+		gstreamer1.0-pulseaudio \
+		gstreamer1.0-qt5 \
+		gstreamer1.0-rtsp \
+		gstreamer1.0-tools \
+		gstreamer1.0-vaapi \
+		gstreamer1.0-wpe \
+		gstreamer1.0-x \
+		intel-media-va-driver-non-free \
+		itt-dev \
+		itt-staticdev \
+		jhi \
+		jhi-tests \
+		libd3dadapter9-mesa \
+		libd3dadapter9-mesa-dev \
+		libdrm-amdgpu1 \
+		libdrm-common \
+		libdrm-dev \
+		libdrm-intel1 \
+		libdrm-nouveau2 \
+		libdrm-radeon1 \
+		libdrm-tests \
+		libdrm2 \
+		libegl-mesa0 \
+		libegl1-mesa \
+		libegl1-mesa-dev \
+		libgbm-dev \
+		libgbm1 \
+		libgl1-mesa-dev \
+		libgl1-mesa-dri \
+		libgl1-mesa-glx \
+		libglapi-mesa \
+		libgles2-mesa \
+		libgles2-mesa-dev \
+		libglx-mesa0 \
+		libgstrtspserver-1.0-dev \
+		libgstrtspserver-1.0-0 \
+		libgstreamer-gl1.0-0 \
+		libgstreamer-opencv1.0-0 \
+		libgstreamer-plugins-bad1.0-0 \
+		libgstreamer-plugins-bad1.0-dev \
+		libgstreamer-plugins-base1.0-0 \
+		libgstreamer-plugins-base1.0-dev \
+		libgstreamer-plugins-good1.0-0 \
+		libgstreamer-plugins-good1.0-dev \
+		libgstreamer1.0-0 \
+		libgstreamer1.0-dev \
+		libigdgmm-dev \
+		libigdgmm12 \
+		libigfxcmrt-dev \
+		libigfxcmrt7 \
+		libosmesa6 \
+		libosmesa6-dev \
+		libtpms-dev \
+		libtpms0 \
+		libva-drm2 \
+		libva-glx2 \
+		libva-wayland2 \
+		libva-x11-2 \
+		libva2 \
+		libwayland-bin \
+		libwayland-client0 \
+		libwayland-cursor0 \
+		libwayland-dev \
+		libwayland-doc \
+		libwayland-egl-backend-dev \
+		libwayland-egl1 \
+		libwayland-egl1-mesa \
+		libwayland-server0 \
+		libweston-9-0 \
+		libweston-9-dev \
+		libxatracker-dev \
+		libxatracker2 \
+		linux-firmware \
+		mesa-common-dev \
+		mesa-utils \
+		mesa-va-drivers \
+		mesa-vdpau-drivers \
+		mesa-vulkan-drivers \
+		libvpl-dev \
+		onevpl-tools \
+		ovmf \
+		ovmf-ia32 \
+		qemu \
+		qemu-efi \
+		qemu-block-extra \
+		qemu-guest-agent \
+		qemu-system \
+		qemu-system-arm \
+		qemu-system-common \
+		qemu-system-data \
+		qemu-system-gui \
+		qemu-system-mips \
+		qemu-system-misc \
+		qemu-system-ppc \
+		qemu-system-s390x \
+		qemu-system-sparc \
+		qemu-system-x86 \
+		qemu-system-x86-microvm \
+		qemu-user \
+		qemu-user-binfmt \
+		qemu-utils \
+		va-driver-all \
+		vainfo \
+		weston \
+		xserver-xorg-core \
+		libvirt0 \
+		libvirt-clients \
+		libvirt-daemon \
+		libvirt-daemon-config-network \
+		libvirt-daemon-config-nwfilter \
+		libvirt-daemon-driver-lxc \
+		libvirt-daemon-driver-qemu \
+		libvirt-daemon-driver-storage-gluster \
+		libvirt-daemon-driver-storage-iscsi-direct \
+		libvirt-daemon-driver-storage-rbd \
+		libvirt-daemon-driver-storage-zfs \
+		libvirt-daemon-driver-vbox \
+		libvirt-daemon-driver-xen \
+		libvirt-daemon-system \
+		libvirt-daemon-system-systemd \
+		libvirt-dev \
+		libvirt-doc \
+		libvirt-login-shell \
+		libvirt-sanlock \
+		libvirt-wireshark \
+		libnss-libvirt \
+		swtpm \
+		swtpm-tools \
+		bmap-tools \
+		g++ \
+		gcc \
+		libssl3 \
+		gdbserver \
+		ethtool \
+		iperf3 \
+		msr-tools \
+		powertop \
+		linuxptp \
+		lsscsi \
+		tpm2-tools \
+		tpm2-abrmd \
+		binutils \
+		cifs-utils \
+                iproute2 \
+			nasm \
+		yasm \
+	ffmpeg \
+	libva-dev
+
+RUN pip3 install meson virtualenv
+
+#Openvino
+RUN wget https://storage.openvinotoolkit.org/repositories/openvino/packages/2022.2/linux/l_openvino_toolkit_ubuntu20_2022.2.0.7713.af16ea1d79a_x86_64.tgz \
+    && tar xzvf l_openvino_toolkit_ubuntu20_2022.2.0.7713.af16ea1d79a_x86_64.tgz \
+    && mkdir -p /opt/intel/openvino \
+    && mv l_openvino_toolkit_ubuntu20_2022.2.0.7713.af16ea1d79a_x86_64/* /opt/intel/openvino/ \
+    && rm l_openvino_toolkit_ubuntu20_2022.2.0.7713.af16ea1d79a_x86_64.*
+
+RUN mkdir -p neo
+WORKDIR /root/neo
+
+RUN curl -fsSL https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | apt-key add - \
+    && apt-add-repository "deb https://apt.repos.intel.com/oneapi all main"
+# install oneapi dpcpp package
+RUN apt-get update
+RUN echo Y | apt-get install intel-oneapi-compiler-dpcpp-cpp-2021.2.0
+
+# level zero 1.6.2 release https://github.com/oneapi-src/level-zero/releases/tag/v1.6.2
+RUN wget https://github.com/oneapi-src/level-zero/releases/download/v1.6.2/level-zero_1.6.2+u18.04_amd64.deb \
+    && wget https://github.com/oneapi-src/level-zero/releases/download/v1.6.2/level-zero-devel_1.6.2+u18.04_amd64.deb \
+    && dpkg -i level-zero*.deb \
+    && rm *.deb
+
+RUN echo Y | apt-get install libjpeg9
+RUN echo Y | apt-get --purge remove libjpeg-turbo8-dev
+RUN echo Y | apt-get install libjpeg-dev
+
+#Opencv
+WORKDIR /root
+RUN git clone -b 4.6.0 https://github.com/opencv/opencv.git
+WORKDIR /root/opencv
+RUN git config --global user.email "abc@def.com" && git format-patch -1 496eed950f6d0e7fd92619d47e3cec8f06e96ace
+RUN git am -3 0001-Add-missing-header-for-LIBAVCODEC_VERSION_INT.patch
+RUN mkdir -p build
+WORKDIR /root/opencv/build
+RUN sed -i 's/MAX_SUPPORTED_PYTHON_VERSION_MINOR="9"/MAX_SUPPORTED_PYTHON_VERSION_MINOR="10"/g' /opt/intel/openvino/setupvars.sh
+RUN source /opt/intel/openvino/setupvars.sh && cmake -G Ninja -D BUILD_INFO_SKIP_EXTRA_MODULES=ON \
+-D BUILD_EXAMPLES=OFF \
+-D BUILD_JASPER=OFF \
+-D BUILD_JAVA=OFF \
+-D BUILD_JPEG=ON \
+-D BUILD_APPS_LIST=version \
+-D BUILD_opencv_apps=ON \
+-D BUILD_opencv_java=OFF \
+-D BUILD_OPENEXR=OFF \
+-D BUILD_PNG=ON \
+-D BUILD_TBB=OFF \
+-D BUILD_WEBP=OFF \
+-D BUILD_ZLIB=ON \
+-D WITH_1394=OFF \
+-D WITH_CUDA=OFF \
+-D WITH_EIGEN=OFF \
+-D WITH_GPHOTO2=OFF \
+-D WITH_GSTREAMER=ON \
+-D OPENCV_GAPI_GSTREAMER=OFF \
+-D WITH_GTK_2_X=OFF \
+-D WITH_IPP=ON \
+-D WITH_JASPER=OFF \
+-D WITH_LAPACK=OFF \
+-D WITH_MATLAB=OFF \
+-D WITH_MFX=ON \
+-D WITH_OPENCLAMDBLAS=OFF \
+-D WITH_OPENCLAMDFFT=OFF \
+-D WITH_OPENEXR=OFF \
+-D WITH_OPENJPEG=OFF \
+-D WITH_QUIRC=OFF \
+-D WITH_TBB=OFF \
+-D WITH_TIFF=OFF \
+-D WITH_VTK=OFF \
+-D WITH_WEBP=OFF \
+-D CMAKE_USE_RELATIVE_PATHS=ON \
+-D CMAKE_SKIP_INSTALL_RPATH=ON \
+-D ENABLE_BUILD_HARDENING=ON \
+-D ENABLE_CONFIG_VERIFICATION=OFF \
+-D ENABLE_PRECOMPILED_HEADERS=OFF \
+-D ENABLE_CXX11=ON \
+-D INSTALL_PDB=ON \
+-D INSTALL_TESTS=ON \
+-D INSTALL_C_EXAMPLES=ON \
+-D INSTALL_PYTHON_EXAMPLES=ON \
+-D CMAKE_INSTALL_PREFIX=install \
+-D OPENCV_SKIP_PKGCONFIG_GENERATION=ON \
+-D OPENCV_SKIP_PYTHON_LOADER=OFF \
+-D OPENCV_SKIP_CMAKE_ROOT_CONFIG=ON \
+-D OPENCV_GENERATE_SETUPVARS=OFF \
+-D OPENCV_BIN_INSTALL_PATH=bin \
+-D OPENCV_INCLUDE_INSTALL_PATH=include \
+-D OPENCV_LIB_INSTALL_PATH=lib \
+-D OPENCV_CONFIG_INSTALL_PATH=cmake \
+-D OPENCV_3P_LIB_INSTALL_PATH=3rdparty \
+-D OPENCV_SAMPLES_SRC_INSTALL_PATH=samples \
+-D OPENCV_DOC_INSTALL_PATH=doc \
+-D OPENCV_OTHER_INSTALL_PATH=etc \
+-D OPENCV_LICENSES_INSTALL_PATH=etc/licenses \
+-D OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT=ON \
+-D BUILD_opencv_world=OFF \
+-D BUILD_opencv_python2=OFF \
+-D BUILD_opencv_python3=ON \
+-D PYTHON3_PACKAGES_PATH=install/python/python3 \
+-D PYTHON3_LIMITED_API=ON \
+-D HIGHGUI_PLUGIN_LIST=all \
+-D OPENCV_PYTHON_INSTALL_PATH=python \
+-D CPU_BASELINE=SSE4_2 \
+-D OPENCV_IPP_GAUSSIAN_BLUR=ON \
+-D WITH_OPENVINO=ON \
+-D VIDEOIO_PLUGIN_LIST=ffmpeg,gstreamer,mfx \
+-D CMAKE_EXE_LINKER_FLAGS=-Wl,--allow-shlib-undefined \
+-DCMAKE_BUILD_TYPE=Release /root/opencv && ninja && cmake --install .
+
+ARG OPENVINO_INSTALL_DIR=/opt/intel/openvino_2021
+ARG OPENVION_ENV=$OPENVINO_INSTALL_DIR/bin/setupvars.sh
+ARG DPCPP_ENV=/opt/intel/oneapi/compiler/2021.2.0/env/vars.sh
